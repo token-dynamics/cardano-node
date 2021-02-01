@@ -92,8 +92,8 @@ renderShelleyQueryCmdError err =
       "Consensus mode and era mismatch. Consensus mode: " <> show cMode <>
       " Era: " <> show era
     ShelleyQueryCmdEraMismatch (EraMismatch ledgerEra queryEra) ->
-      "An error mismatch occured. Specified query era: " <> queryEra <>
-      "Current ledger era: " <> ledgerEra
+      "\nAn error mismatch occured." <> "\nSpecified query era: " <> queryEra <>
+      "\nCurrent ledger era: " <> ledgerEra
 
 runQueryCmd :: QueryCmd -> ExceptT ShelleyQueryCmdError IO ()
 runQueryCmd cmd =

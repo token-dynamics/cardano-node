@@ -31,15 +31,19 @@ module Cardano.Api.Query (
     ProtocolState(..),
   ) where
 
-import           Data.Aeson (ToJSON)
+import           Data.Aeson (ToJSON(..), object, (.=))
+import qualified Data.Aeson as Aeson
 import           Data.Bifunctor (bimap)
 import           Data.Map (Map)
 import qualified Data.Map as Map
 import           Data.Maybe (mapMaybe)
 import           Data.Set (Set)
+import qualified Data.Text as Text
+import qualified Data.Text.Encoding as Text
 import qualified Data.Set as Set
 import           Data.SOP.Strict (SListI)
 import           Prelude
+import qualified Data.Vector as Vector
 
 import           Ouroboros.Network.Protocol.LocalStateQuery.Client (Some (..))
 
@@ -64,6 +68,7 @@ import qualified Shelley.Spec.Ledger.LedgerState as Shelley
 import           Cardano.Api.Address
 import           Cardano.Api.Block
 import           Cardano.Api.Certificate
+import           Cardano.Api.SerialiseRaw
 import           Cardano.Api.Eras
 import           Cardano.Api.KeysShelley
 import           Cardano.Api.Modes
@@ -158,12 +163,23 @@ newtype ByronUpdateState = ByronUpdateState Byron.Update.State
 
 newtype UTxO era = UTxO (Map TxIn (TxOut era))
 
+instance IsCardanoEra era => ToJSON (UTxO era) where
+  toJSON (UTxO m) = Aeson.Array . Vector.fromList . map convert $ Map.toList m
+   where
+    convert :: (TxIn, TxOut era) -> Aeson.Value
+    convert ((TxIn txId (TxIx ix), txout)) =
+      let txin = ( Text.decodeUtf8 (serialiseToRawBytesHex txId)
+                 <> "#"
+                 <> Text.pack (show ix)
+                 )
+      in object [ txin .= toJSON txout]
+
+
 newtype LedgerState era
   = LedgerState (Serialised (Shelley.NewEpochState (ShelleyLedgerEra era)))
 
 newtype ProtocolState era
   = ProtocolState (Serialised (Shelley.ChainDepState (Ledger.Crypto (ShelleyLedgerEra era))))
-deriving newtype instance IsCardanoEra era => ToJSON (UTxO era)
 
 toShelleyAddrSet :: CardanoEra era
                  -> Set AddressAny

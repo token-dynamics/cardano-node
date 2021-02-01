@@ -96,9 +96,8 @@ module Cardano.Api.TxBody (
 
 import           Prelude
 
-import           Data.Aeson (ToJSON (..))
+import           Data.Aeson (ToJSON (..), (.=), object)
 import qualified Data.Aeson as Aeson
-import           Data.Aeson.Types (ToJSONKey (..), toJSONKeyText)
 import           Data.Bifunctor (first)
 import           Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LBS
@@ -111,6 +110,7 @@ import qualified Data.Sequence.Strict as Seq
 import qualified Data.Set as Set
 import           Data.String (IsString)
 import qualified Data.Text as Text
+import qualified Data.Text.Encoding as Text
 import           Data.Word (Word64)
 import           GHC.Generics
 
@@ -234,10 +234,6 @@ getTxId (ShelleyTxBody era tx _) =
 data TxIn = TxIn TxId TxIx
   deriving (Eq, Generic, Ord, Show)
 
-deriving instance ToJSON TxIn
-instance ToJSONKey TxIn where
-  toJSONKey = toJSONKeyText (Text.pack . show)
-
 newtype TxIx = TxIx Word
   deriving stock (Eq, Ord, Show)
   deriving newtype (Enum)
@@ -272,7 +268,26 @@ data TxOut era
   = TxOut (AddressInEra era) (TxOutValue era)
   deriving Generic
 
-deriving instance IsCardanoEra era => ToJSON (TxOut era)
+instance IsCardanoEra era => ToJSON (TxOut era) where
+  toJSON (TxOut (AddressInEra addrType addr) val) =
+    case addrType of
+      ByronAddressInAnyEra ->
+        let hexAddr = Text.decodeUtf8 $ serialiseToRawBytesHex addr
+        in object [ hexAddr .= toJSON val ]
+      ShelleyAddressInEra sbe ->
+        case sbe of
+          ShelleyBasedEraShelley ->
+            let hexAddr = Text.decodeUtf8 $ serialiseToRawBytesHex addr
+            in object [ hexAddr .= toJSON val ]
+          ShelleyBasedEraAllegra ->
+            let hexAddr = Text.decodeUtf8 $ serialiseToRawBytesHex addr
+            in object [ hexAddr .= toJSON val ]
+          ShelleyBasedEraMary ->
+            let hexAddr = Text.decodeUtf8 $ serialiseToRawBytesHex addr
+            in object [ hexAddr .= toJSON val ]
+
+
+
 deriving instance Eq   (TxOut era)
 deriving instance Show (TxOut era)
 
@@ -611,8 +626,11 @@ data TxOutValue era where
 
 deriving instance Eq   (TxOutValue era)
 deriving instance Show (TxOutValue era)
-deriving instance ToJSON (TxOutValue era)
 deriving instance Generic (TxOutValue era)
+
+instance ToJSON (TxOutValue era) where
+  toJSON (TxOutAdaOnly _ (Lovelace int)) = Aeson.Number $ fromInteger int
+  toJSON (TxOutValue _ val) = toJSON val
 
 -- ----------------------------------------------------------------------------
 -- Transaction fees
