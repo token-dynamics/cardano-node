@@ -38,7 +38,7 @@ The output is the transaction fee in lovelace:
 
     > 171485
 
-Registering the stake address, not only pay transaction fees, but also includes a _deposit_ (which you get back when deregister the key) as stated in the protocol parameters:
+Registering the stake address, not only pays transaction fees, but also includes a _deposit_ (which you get back when deregister the key) as stated in the protocol parameters:
 
 The deposit amount can be found in the `protocol.json` under `keyDeposit`, for example in Shelley Tesntet:
 
@@ -64,7 +64,7 @@ Query the UTXO of the address that pays for the transaction and deposit:
 
 #### Submit the certificate with a transaction:
 
-Build the transaction, this time include  --ttl and --fee  
+Build the transaction, this time include  --ttl and --fee
 
     cardano-cli shelley transaction build-raw \
     --tx-in b64ae44e1195b04663ab863b62337e626c65b0c9855a9fbb9ef4458f81a6f5ee#1 \

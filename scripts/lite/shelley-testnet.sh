@@ -9,6 +9,8 @@ configuration="${ROOT}/scripts/lite/configuration"
 
 data_dir="$(mktemp).d"
 mkdir -p "${data_dir}"
+echo ${data_dir}
+sleep 3
 
 # Generate shelley genesis spec
 ARGSSPEC=(
