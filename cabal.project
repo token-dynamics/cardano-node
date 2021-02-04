@@ -111,8 +111,8 @@ package io-sim-classes
 -- source-repository-package
 --   type: git
 --   location: https://github.com/input-output-hk/cardano-ledger-specs
---   tag: 0d0f001ec627a963fbc2cbe65273468fdb0f6b75
---   --sha256: 0aww7ls090gvsss0lq3dg95hzffblzmkhdv0x0nnz9d70srn3052
+--   tag: b487a896b4f585605482b3d7144721abdb4c692f
+--   --sha256: 0lvr70ayqz7yf7pjg8ywa5rzrh5vwm4fn21fywgz58lmj8m05ifb
 --   subdir:
 --     byron/chain/executable-spec
 --     byron/crypto
@@ -126,6 +126,7 @@ package io-sim-classes
 --     shelley/chain-and-ledger/executable-spec
 --     shelley/chain-and-ledger/shelley-spec-ledger-test
 --     shelley-ma/impl
+--     pivo
 
 -- source-repository-package
 --   type: git
@@ -160,8 +161,8 @@ package io-sim-classes
 -- source-repository-package
 --   type: git
 --   location: https://github.com/input-output-hk/ouroboros-network
---   tag: 612270da8152972d1f7891e7f2c8ec60d30449f8
---   --sha256: 10ggxwvv4hnnb4gry0r0c3im7jcv6bxa4pgsfp5qvl1qqq99dlah
+--   tag: 55c2f81bdbf86cd9279d01c487bc9c35b21454da
+--   --sha256: 1fgci3dlaw73qmxvphrghmj5z3ahgsj4slvagw67kbz1m13v29g6
 --   subdir:
 --     io-sim
 --     io-sim-classes
