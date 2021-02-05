@@ -111,7 +111,6 @@ import qualified Data.Set as Set
 import           Data.String (IsString)
 import           Data.Text (Text)
 import qualified Data.Text as Text
-import qualified Data.Text.Encoding as Text
 import           Data.Word (Word64)
 import           GHC.Generics
 
@@ -177,7 +176,7 @@ newtype TxId = TxId (Shelley.Hash StandardCrypto Shelley.EraIndependentTxBody)
                -- We use the Shelley representation and convert the Byron one
 
 instance ToJSON TxId where
-  toJSON = Aeson.String . Text.decodeUtf8 . serialiseToRawBytesHex
+  toJSON = Aeson.String . serialiseToRawBytesHexText
 
 instance HasTypeProxy TxId where
     data AsType TxId = AsTxId
@@ -244,10 +243,8 @@ instance ToJSONKey TxIn where
 
 renderTxIn :: TxIn -> Text
 renderTxIn (TxIn txId (TxIx ix)) =
-  (  Text.decodeUtf8 (serialiseToRawBytesHex txId)
-  <> "#"
-  <> Text.pack (show ix)
-  )
+  serialiseToRawBytesHexText txId <> "#" <> Text.pack (show ix)
+
 
 newtype TxIx = TxIx Word
   deriving stock (Eq, Ord, Show)
@@ -287,22 +284,22 @@ instance IsCardanoEra era => ToJSON (TxOut era) where
   toJSON (TxOut (AddressInEra addrType addr) val) =
     case addrType of
       ByronAddressInAnyEra ->
-        let hexAddr = Text.decodeUtf8 $ serialiseToRawBytesHex addr
+        let hexAddr = serialiseToRawBytesHexText addr
         in object [ hexAddr .= toJSON val ]
       ShelleyAddressInEra sbe ->
         case sbe of
           ShelleyBasedEraShelley ->
-            let hexAddr = Text.decodeUtf8 $ serialiseToRawBytesHex addr
+            let hexAddr = serialiseToRawBytesHexText addr
             in object [ "address" .= hexAddr
                       , "value" .= toJSON val
                       ]
           ShelleyBasedEraAllegra ->
-            let hexAddr = Text.decodeUtf8 $ serialiseToRawBytesHex addr
+            let hexAddr = serialiseToRawBytesHexText addr
             in object [ "address" .= hexAddr
                       , "value" .= toJSON val
                       ]
           ShelleyBasedEraMary ->
-            let hexAddr = Text.decodeUtf8 $ serialiseToRawBytesHex addr
+            let hexAddr = serialiseToRawBytesHexText addr
             in object [ "address" .= hexAddr
                       , "value" .= toJSON val
                       ]

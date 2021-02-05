@@ -46,7 +46,6 @@ import qualified Data.Aeson as Aeson
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Short as SBS
 import           Data.Foldable (Foldable (toList))
-import qualified Data.Text.Encoding as Text
 
 import           Cardano.Slotting.Block (BlockNo)
 import           Cardano.Slotting.Slot (EpochNo, SlotNo)
@@ -70,8 +69,8 @@ import qualified Cardano.Chain.UTxO as Byron
 import qualified Shelley.Spec.Ledger.BlockChain as Shelley
 
 import           Cardano.Api.Eras
-import           Cardano.Api.Hash
 import           Cardano.Api.HasTypeProxy
+import           Cardano.Api.Hash
 import           Cardano.Api.Modes
 import           Cardano.Api.SerialiseRaw
 import           Cardano.Api.Tx
@@ -333,7 +332,7 @@ instance ToJSON ChainTip where
   toJSON ChainTipAtGenesis = Aeson.Null
   toJSON (ChainTip slot headerHash (Consensus.BlockNo bNum)) =
     object [ "slot" .= slot
-           , "hash" .= Text.decodeUtf8 (serialiseToRawBytesHex headerHash)
+           , "hash" .= serialiseToRawBytesHexText headerHash
            , "block" .= bNum
            ]
 

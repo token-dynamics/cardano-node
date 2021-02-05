@@ -61,6 +61,7 @@ import           Ouroboros.Network.Block (Serialised)
 
 import           Cardano.Binary
 import qualified Cardano.Chain.Update.Validation.Interface as Byron.Update
+import qualified Cardano.Ledger.Core as Core
 import qualified Cardano.Ledger.Era as Ledger
 
 import qualified Shelley.Spec.Ledger.API as Shelley
@@ -167,7 +168,6 @@ newtype UTxO era = UTxO (Map TxIn (TxOut era))
 instance IsCardanoEra era => ToJSON (UTxO era) where
   toJSON (UTxO m) = toJSON m
 
-
 newtype SerialisedLedgerState era
   = SerialisedLedgerState (Serialised (Shelley.NewEpochState (ShelleyLedgerEra era)))
 
@@ -177,7 +177,11 @@ data LedgerState era where
 instance (Typeable era, Shelley.TransLedgerState FromCBOR (ShelleyLedgerEra era)) => FromCBOR (LedgerState era) where
   fromCBOR = LedgerState <$> (fromCBOR :: Decoder s (Shelley.NewEpochState (ShelleyLedgerEra era)))
 
-instance ToJSON (LedgerState ShelleyEra) where
+-- TODO: Shelley based era class!
+instance ( IsShelleyBasedEra era
+         , ShelleyLedgerEra era ~ ledgerera
+         , Consensus.ShelleyBasedEra ledgerera
+         , ToJSON (Core.TxOut ledgerera)) => ToJSON (LedgerState era) where
   toJSON (LedgerState newEpochS) = object [ "lastEpoch" .= Shelley.nesEL newEpochS
                                           , "blocksBefore" .= Shelley.nesBprev newEpochS
                                           , "blocksCurrent" .= Shelley.nesBcur newEpochS
@@ -185,26 +189,6 @@ instance ToJSON (LedgerState ShelleyEra) where
                                           , "possibleRewardUpdate" .= Shelley.nesRu newEpochS
                                           , "stakeDistrib" .= Shelley.nesPd newEpochS
                                           ]
-
-instance ToJSON (LedgerState AllegraEra) where
-  toJSON (LedgerState newEpochS) = object [ "lastEpoch" .= Shelley.nesEL newEpochS
-                                          , "blocksBefore" .= Shelley.nesBprev newEpochS
-                                          , "blocksCurrent" .= Shelley.nesBcur newEpochS
-                                          , "stateBefore" .= Shelley.nesEs newEpochS
-                                          , "possibleRewardUpdate" .= Shelley.nesRu newEpochS
-                                          , "stakeDistrib" .= Shelley.nesPd newEpochS
-                                          ]
-
-
-instance ToJSON (LedgerState MaryEra) where
-  toJSON (LedgerState newEpochS) = object [ "lastEpoch" .= Shelley.nesEL newEpochS
-                                          , "blocksBefore" .= Shelley.nesBprev newEpochS
-                                          , "blocksCurrent" .= Shelley.nesBcur newEpochS
-                                          , "stateBefore" .= Shelley.nesEs newEpochS
-                                          , "possibleRewardUpdate" .= Shelley.nesRu newEpochS
-                                          , "stakeDistrib" .= Shelley.nesPd newEpochS
-                                          ]
-
 
 newtype ProtocolState era
   = ProtocolState (Serialised (Shelley.ChainDepState (Ledger.Crypto (ShelleyLedgerEra era))))
